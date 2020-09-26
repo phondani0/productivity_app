@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'UI/Intray/intray_page.dart';
 import 'models/global.dart';
 
 void main() {
@@ -37,9 +38,7 @@ class _MyHomePageState extends State<MyHomePage> {
             body: Stack(
               children: <Widget>[
                 TabBarView(children: [
-                  new Container(
-                    color: darkGreyColor,
-                  ),
+                  IntrayPage(),
                   new Container(
                     color: Colors.orange,
                   ),
@@ -78,7 +77,7 @@ class _MyHomePageState extends State<MyHomePage> {
                       Icons.add,
                       size: 70,
                     ),
-                    backgroundColor: Colors.red,
+                    backgroundColor: primaryColor,
                     onPressed: () {
                       print('Pressed');
                     },
