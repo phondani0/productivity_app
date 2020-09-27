@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:todoapp/models/widgets/login.dart';
 import 'UI/Intray/intray_page.dart';
 import 'models/global.dart';
 
@@ -39,9 +40,7 @@ class _MyHomePageState extends State<MyHomePage> {
               children: <Widget>[
                 TabBarView(children: [
                   IntrayPage(),
-                  new Container(
-                    color: Colors.orange,
-                  ),
+                  LoginPageWidget(),
                   new Container(
                     color: Colors.lightGreen,
                   )
