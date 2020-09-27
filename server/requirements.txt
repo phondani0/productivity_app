@@ -1,0 +1,10 @@
+Flask==1.1.2
+flask-marshmallow==0.13.0
+marshmallow-sqlalchemy==0.23.1
+Flask-Migrate==2.5.3
+Flask-RESTful==0.3.8
+Flask-Script==2.0.6
+Flask-SQLAlchemy==2.4.4
+pylint==2.6.0
+PyMySQL==0.10.1
+python-dotenv==0.14.0

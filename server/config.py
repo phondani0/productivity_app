@@ -12,10 +12,20 @@ import os
 #     'mysql+pymysql://ankit:%s@localhost:3306/productivity_app' % urllib.parse.quote_plus('password@123'))
 # print(engine.url)
 
-db_con_str = 'mysql+pymysql://ankit:%s@localhost:3306/productivity_app' % urllib.parse.quote_plus(
-    'ankit@123')
+from dotenv import load_dotenv
 
-# print(db_con_str)
+load_dotenv()
+
+db_user = os.environ['DB_USER']
+db_password = os.environ['DB_PASSWORD']
+db_name = os.environ['DB_NAME']
+db_host = os.environ['DB_HOST']
+
+db_uri = 'mysql+pymysql://' + db_user + ':%s@' + db_host + '/'+db_name
+
+db_con_str = db_uri % urllib.parse.quote_plus(db_password)
+
+print(db_con_str)
 
 SQLALCHEMY_ECHO = False
 SQLALCHEMY_TRACK_MODIFICATIONS = True
