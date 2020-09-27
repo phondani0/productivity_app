@@ -60,3 +60,5 @@ target/
 .vscode/
 .idea/
 .env
+
+firebase-admin.json

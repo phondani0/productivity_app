@@ -1,4 +1,6 @@
 from flask import Flask
+import firebase_admin
+from firebase_admin import credentials
 
 
 def create_app(config_filename):
@@ -10,6 +12,10 @@ def create_app(config_filename):
 
     from Model import db
     db.init_app(app)
+
+    # Connect to firebase
+    cred = credentials.Certificate("firebase-admin.json")
+    firebase_admin.initialize_app(cred)
 
     return app
 

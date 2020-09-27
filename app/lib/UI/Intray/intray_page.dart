@@ -44,7 +44,7 @@ class _IntrayPageState extends State<IntrayPage> {
   void getList() {
     for (int i = 0; i < 10; i++) {
       taskList
-          .add(Task("Todo item " + (i + 1).toString(), false, i.toString()));
+          .add(Task(i.toString(), "Todo item " + (i + 1).toString(), false));
     }
   }
 
