@@ -8,12 +8,12 @@ ma = Marshmallow()
 db = SQLAlchemy()
 
 
-class User(db.Model):
-    __tablename__ = 'users'
+class Task(db.Model):
+    __tablename__ = 'tasks'
     id = db.Column(db.Integer, primary_key=True)
-    name = db.Column(db.String(150), nullable=False)
-    email = db.Column(db.String(150), unique=True, nullable=False)
-    password = db.Column(db.String(150), nullable=False)
+    title = db.Column(db.String(150), nullable=False)
+    completed = db.Column(db.Boolean, nullable=False)
+
     # creation_date = db.Column(
     #     db.TIMESTAMP, server_default=db.func.current_timestamp(), nullable=False)
     # category_id = db.Column(db.Integer, db.ForeignKey('categories.id', ondelete='CASCADE'), nullable=False)
@@ -34,11 +34,10 @@ class User(db.Model):
 #         self.name = name
 
 
-class CategorySchema(ma.Schema):
+class TaskSchema(ma.Schema):
     id = fields.Integer()
-    name = fields.String(required=True, validate=validate.Length(1))
-    email = fields.String(required=True, validate=validate.Length(1))
-    password = fields.String(required=True, validate=validate.Length(4))
+    title = fields.String(required=True, validate=validate.Length(1))
+    completed = fields.Boolean(required=True, validate=validate.Length(1))
 
 
 # class CommentSchema(ma.Schema):
