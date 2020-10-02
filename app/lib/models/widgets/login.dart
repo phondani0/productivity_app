@@ -7,7 +7,6 @@ import 'package:flutter/material.dart';
 import 'package:google_sign_in/google_sign_in.dart';
 import 'package:todoapp/models/classes/task.dart';
 import 'package:todoapp/models/global.dart';
-import 'package:http/http.dart' as http;
 
 class LoginPageWidget extends StatefulWidget {
   @override
@@ -19,7 +18,6 @@ class LoginPageWidgetState extends State<LoginPageWidget> {
   FirebaseAuth _auth;
   bool isUserSignedIn = false;
   String userAuthToken;
-  Future<Task> taskAlbum;
   @override
   void initState() {
     super.initState();
@@ -31,7 +29,6 @@ class LoginPageWidgetState extends State<LoginPageWidget> {
     _auth = FirebaseAuth.instanceFor(app: defaultApp);
     // immediately check whether the user is signed in
     checkIfUserIsSignedIn();
-    taskAlbum = fetchTask();
   }
 
   void checkIfUserIsSignedIn() async {
@@ -60,26 +57,6 @@ class LoginPageWidgetState extends State<LoginPageWidget> {
       isUserSignedIn = true;
       userAuthToken = idToken;
     });
-    taskAlbum = fetchTask();
-  }
-
-  Future<Task> fetchTask() async {
-    // print(userAuthToken);
-    final response = await http.get(
-      'http://10.0.2.2:5000/api/task',
-      headers: {HttpHeaders.authorizationHeader: userAuthToken},
-    );
-
-    if (response.statusCode == 200) {
-      // If the server did return a 200 OK response,
-      // then parse the JSON.
-      return Task.fromJson(json.decode(response.body));
-    } else {
-      print(response.body);
-      // If the server did not return a 200 OK response,
-      // then throw an exception.
-      throw Exception('Failed to load task');
-    }
   }
 
   @override
@@ -111,21 +88,7 @@ class LoginPageWidgetState extends State<LoginPageWidget> {
                     ],
                   )),
             ),
-            Container(
-              child: FutureBuilder<Task>(
-                future: taskAlbum,
-                builder: (context, snapshot) {
-                  if (snapshot.hasData) {
-                    print(snapshot.data.completed);
-                    return Text(snapshot.data.title);
-                  } else if (snapshot.hasError) {
-                    return Text("${snapshot.error}");
-                  }
-                  // By default, show a loading spinner.
-                  return CircularProgressIndicator();
-                },
-              ),
-            )
+            Container(child: Text("Logged In"))
           ],
         ),
       ),
