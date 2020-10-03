@@ -5,7 +5,7 @@ import 'package:firebase_auth/firebase_auth.dart';
 import 'package:firebase_core/firebase_core.dart';
 import 'package:flutter/material.dart';
 import 'package:google_sign_in/google_sign_in.dart';
-import 'package:todoapp/models/classes/task.dart';
+import 'package:todoapp/models/classes/user.dart';
 import 'package:todoapp/models/global.dart';
 
 class LoginPageWidget extends StatefulWidget {
@@ -17,7 +17,9 @@ class LoginPageWidgetState extends State<LoginPageWidget> {
   GoogleSignIn _googleSignIn = GoogleSignIn();
   FirebaseAuth _auth;
   bool isUserSignedIn = false;
-  String userAuthToken;
+  static String userAuthToken;
+  static LocalUser localUser;
+
   @override
   void initState() {
     super.initState();
@@ -33,9 +35,20 @@ class LoginPageWidgetState extends State<LoginPageWidget> {
 
   void checkIfUserIsSignedIn() async {
     var userSignedIn = await _googleSignIn.isSignedIn();
-
+    var user = _googleSignIn.currentUser;
+    var localUser;
+    print(user);
+    if (user != null) {
+      localUser = LocalUser(
+        id: user.id,
+        displayName: user.displayName,
+        photoUrl: user.photoUrl,
+        email: user.email,
+      );
+    }
     setState(() {
       isUserSignedIn = userSignedIn;
+      localUser = localUser;
     });
   }
 
@@ -43,24 +56,37 @@ class LoginPageWidgetState extends State<LoginPageWidget> {
     print(isUserSignedIn);
     User user = await _handleSignIn();
     print(user);
-
     var idToken = await user.getIdToken();
     // print(idToken);
+    // Navigator.push(
+    //   context,
+    //   MaterialPageRoute(
+    //     builder: (context) => WelcomeUserWidget(user, _googleSignIn),
+    //   ),
+    // );
 
-    // var userSignedIn = Navigator.push(
-    //     context,
-    //     MaterialPageRoute(
-    //         builder: (context) => WelcomeUserWidget(user, _googleSignIn)));
     // taskAlbum = fetchTask();
     setState(() {
-      // isUserSignedIn = userSignedIn == null ? true : false;
+      // isUserSignedIn = userSign;edIn == null ? true : false;
       isUserSignedIn = true;
       userAuthToken = idToken;
+      localUser = LocalUser(
+        id: user.uid,
+        displayName: user.displayName,
+        photoUrl: user.photoURL,
+        email: user.email,
+      );
     });
   }
 
   @override
   Widget build(BuildContext context) {
+    // var user1 = _googleSignIn.currentUser;
+
+    // setState(() {
+    //   user = user1;
+    // });
+    // print('user ${user}');
     return new Container(
       color: Colors.orange,
       child: Align(
@@ -68,27 +94,59 @@ class LoginPageWidgetState extends State<LoginPageWidget> {
         child: Column(
           mainAxisAlignment: MainAxisAlignment.spaceEvenly,
           children: [
-            FlatButton(
-              shape: RoundedRectangleBorder(
-                  borderRadius: BorderRadius.circular(20)),
-              onPressed: () {
-                onGoogleSignIn(context);
-              },
-              color: Colors.blueAccent,
-              child: Padding(
-                  padding: EdgeInsets.all(10),
-                  child: Row(
-                    mainAxisAlignment: MainAxisAlignment.center,
-                    crossAxisAlignment: CrossAxisAlignment.center,
-                    children: <Widget>[
-                      Icon(Icons.account_circle, color: Colors.white),
-                      SizedBox(width: 10),
-                      Text('Login with Google',
-                          style: TextStyle(color: Colors.white)),
-                    ],
-                  )),
-            ),
-            Container(child: Text("Logged In"))
+            isUserSignedIn && localUser != null
+                ? Container(
+                    child: Column(
+                      children: [
+                        ClipOval(
+                          child: Image.network(localUser.photoUrl,
+                              width: 100, height: 100, fit: BoxFit.cover),
+                        ),
+                        Text(
+                          localUser.displayName,
+                          textAlign: TextAlign.center,
+                          style: TextStyle(
+                              fontWeight: FontWeight.bold, fontSize: 25),
+                        ),
+                        FlatButton(
+                          shape: RoundedRectangleBorder(
+                            borderRadius: BorderRadius.circular(20),
+                          ),
+                          child: Text("Logout"),
+                          color: primaryColor,
+                          textColor: Colors.white,
+                          onPressed: () {
+                            _googleSignIn.signOut();
+                            setState(() {
+                              isUserSignedIn = false;
+                              localUser = null;
+                            });
+                          },
+                        ),
+                      ],
+                    ),
+                  )
+                : FlatButton(
+                    shape: RoundedRectangleBorder(
+                        borderRadius: BorderRadius.circular(20)),
+                    onPressed: () {
+                      onGoogleSignIn(context);
+                    },
+                    color: Colors.blueAccent,
+                    child: Padding(
+                      padding: EdgeInsets.all(10),
+                      child: Row(
+                        mainAxisAlignment: MainAxisAlignment.center,
+                        crossAxisAlignment: CrossAxisAlignment.center,
+                        children: <Widget>[
+                          Icon(Icons.account_circle, color: Colors.white),
+                          SizedBox(width: 10),
+                          Text('Login with Google',
+                              style: TextStyle(color: Colors.white)),
+                        ],
+                      ),
+                    ),
+                  ),
           ],
         ),
       ),
@@ -120,7 +178,43 @@ class LoginPageWidgetState extends State<LoginPageWidget> {
         isUserSignedIn = userSignedIn;
       });
     }
-
     return user;
   }
 }
+
+// class WelcomeUserWidget extends StatelessWidget {
+//   GoogleSignIn _googleSignIn;
+//   User _user;
+//   WelcomeUserWidget(User user, GoogleSignIn signIn) {
+//     _user = user;
+//     _googleSignIn = signIn;
+//   }
+
+//   @override
+//   Widget build(BuildContext context) {
+//     return Container(
+//       child: Column(
+//         children: [
+//           ClipOval(
+//             child: Image.network(_user.photoURL,
+//                 width: 100, height: 100, fit: BoxFit.cover),
+//           ),
+//           Text(
+//             _user.displayName,
+//             textAlign: TextAlign.center,
+//             style: TextStyle(fontWeight: FontWeight.bold, fontSize: 25),
+//           ),
+//           FlatButton(
+//               shape: RoundedRectangleBorder(
+//                 borderRadius: BorderRadius.circular(20),
+//               ),
+//               child: Text("Logout"),
+//               onPressed: () {
+//                 _googleSignIn.signOut();
+//                 Navigator.pop(context);
+//               }),
+//         ],
+//       ),
+//     );
+//   }
+// }

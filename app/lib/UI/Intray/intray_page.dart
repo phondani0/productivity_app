@@ -6,6 +6,7 @@ import 'package:todoapp/models/classes/task.dart';
 import 'package:todoapp/models/global.dart';
 import 'package:todoapp/models/widgets/intray_todo.dart';
 import 'package:http/http.dart' as http;
+import 'package:todoapp/models/widgets/login.dart';
 
 class IntrayPage extends StatefulWidget {
   @override
@@ -74,9 +75,11 @@ class _IntrayPageState extends State<IntrayPage> {
 
   Future<List<Task>> fetchTasks() async {
     // print(userAuthToken);
+    String userAuthToken = LoginPageWidgetState.userAuthToken;
+
     final response = await http.get(
       'http://10.0.2.2:5000/api/task',
-      // headers: {HttpHeaders.authorizationHeader: userAuthToken},
+      headers: {HttpHeaders.authorizationHeader: userAuthToken},
     );
     print(3);
     if (response.statusCode == 200) {
