@@ -55,7 +55,13 @@ class _IntrayPageState extends State<IntrayPage> {
             return Text("${snapshot.error}");
           }
           // By default, show a loading spinner.
-          return CircularProgressIndicator();
+          return Center(
+            child: SizedBox(
+              child: CircularProgressIndicator(),
+              height: 50.0,
+              width: 50.0,
+            ),
+          );
         },
       ),
     );
@@ -66,10 +72,10 @@ class _IntrayPageState extends State<IntrayPage> {
       if (newIndex > oldIndex) {
         newIndex -= 1;
       }
+      print("$oldIndex, $newIndex");
       Task item = taskList[oldIndex];
       taskList.remove(item);
       taskList.insert(newIndex, item);
-      print(taskList[0].title);
     });
   }
 
@@ -78,21 +84,20 @@ class _IntrayPageState extends State<IntrayPage> {
     String userAuthToken = LoginPageWidgetState.userAuthToken;
 
     final response = await http.get(
-      'http://10.0.2.2:5000/api/task',
+      // 'http://10.0.2.2:5000/api/task',
+      'https://phondani1.pythonanywhere.com/api/task',
       headers: {HttpHeaders.authorizationHeader: userAuthToken},
     );
     print(3);
+    print(response.statusCode);
     if (response.statusCode == 200) {
       // If the server did return a 200 OK response,
       // then parse the JSON.
-      // print(json.decode(response.body)[0]);
-      var jsonRes = json.decode(response.body);
-      List<Task> list = [];
-      jsonRes.forEach((e) {
-        list.add(Task.fromJson(e));
-      });
+      // print(json.decode(response.body));
 
-      return list;
+      var jsonRes = json.decode(response.body).cast<Map<String, dynamic>>();
+
+      return jsonRes.map<Task>((json) => Task.fromJson(json)).toList();
     } else {
       print(response.body);
       // If the server did not return a 200 OK response,

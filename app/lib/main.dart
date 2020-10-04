@@ -265,12 +265,15 @@ class _MyHomePageState extends State<MyHomePage> {
 
     Map reqBody = {"title": title};
 
-    final response = await http.post('http://10.0.2.2:5000/api/task',
-        headers: {
-          HttpHeaders.authorizationHeader: userAuthToken,
-          HttpHeaders.contentTypeHeader: "application/json"
-        },
-        body: json.encode(reqBody));
+    final response = await http.post(
+      // 'http://10.0.2.2:5000/api/task',
+      'https://phondani1.pythonanywhere.com/api/task',
+      headers: {
+        HttpHeaders.authorizationHeader: userAuthToken,
+        HttpHeaders.contentTypeHeader: "application/json"
+      },
+      body: json.encode(reqBody),
+    );
     print(3);
     if (response.statusCode == 200) {
       // If the server did return a 200 OK response,
