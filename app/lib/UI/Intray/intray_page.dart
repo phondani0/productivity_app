@@ -1,25 +1,38 @@
 import 'dart:convert';
 import 'dart:io';
 
+import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
+import 'package:todoapp/models/classes/storage.dart';
 import 'package:todoapp/models/classes/task.dart';
 import 'package:todoapp/models/global.dart';
 import 'package:todoapp/models/widgets/intray_todo.dart';
 import 'package:http/http.dart' as http;
-import 'package:todoapp/models/widgets/login.dart';
 
 class IntrayPage extends StatefulWidget {
+  addTaskHandler() => createState().addTaskHandler();
+
   @override
-  _IntrayPageState createState() => _IntrayPageState();
+  IntrayPageState createState() => IntrayPageState();
 }
 
-class _IntrayPageState extends State<IntrayPage> {
+class IntrayPageState extends State<IntrayPage> {
   List<Task> taskList = [];
-  Future<List<Task>> taskAlbum;
+  static Future<List<Task>> taskAlbum;
+  final _storage = Storage();
+
+  @override
+  void initState() {
+    super.initState();
+    taskAlbum = fetchTasks();
+  }
+
+  addTaskHandler() {
+    print("add task handler called...");
+  }
 
   @override
   Widget build(BuildContext context) {
-    taskAlbum = fetchTasks();
     return Container(
       color: darkGreyColor,
       child: _buildReorderableListSimple(context),
@@ -80,8 +93,28 @@ class _IntrayPageState extends State<IntrayPage> {
   }
 
   Future<List<Task>> fetchTasks() async {
+    var tasks = [];
+    var jsonData = await _storage.read("tasks");
+    if (jsonData != null) {
+      tasks = json.decode(jsonData).cast<Map<String, dynamic>>();
+    }
+
+    print("tasks from storage.. $tasks");
+    if (tasks.length > 0) {
+      // var jsonRes = json.decode(tasks).cast<Map<String, dynamic>>();
+      var response = tasks.map<Task>((json) => Task.fromJson(json)).toList();
+      print("response.. $response");
+      return response;
+    }
+
+    var userAuthToken;
+    var data = await _storage.read("user");
+    if (data != null) {
+      userAuthToken = json.decode(data)['idToken'];
+    }
     // print(userAuthToken);
-    String userAuthToken = LoginPageWidgetState.userAuthToken;
+
+    print('get tasks...');
 
     final response = await http.get(
       // 'http://10.0.2.2:5000/api/task',
@@ -94,6 +127,9 @@ class _IntrayPageState extends State<IntrayPage> {
       // If the server did return a 200 OK response,
       // then parse the JSON.
       // print(json.decode(response.body));
+
+      print(response.body);
+      _storage.addNewItem("tasks", response.body);
 
       var jsonRes = json.decode(response.body).cast<Map<String, dynamic>>();
 

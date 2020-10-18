@@ -1,14 +1,32 @@
 import 'dart:convert';
 import 'dart:io';
-
 import 'package:flutter/material.dart';
 import 'package:todoapp/models/widgets/login.dart';
 import 'UI/Intray/intray_page.dart';
+import 'models/classes/storage.dart';
 import 'models/classes/task.dart';
 import 'models/global.dart';
 import 'package:todoapp/models/global.dart';
 import 'package:http/http.dart' as http;
 import 'models/widgets/login.dart';
+
+// // Create storage
+// final storage = new FlutterSecureStorage();
+
+// // Read value
+// String value = await storage.read(key: key);
+
+// // Read all values
+// Map<String, String> allValues = await storage.readAll();
+
+// // Delete value
+// await storage.delete(key: key);
+
+// // Delete all
+// await storage.deleteAll();
+
+// // Write value
+// await storage.write(key: key, value: value);
 
 void main() {
   runApp(MyApp());
@@ -19,9 +37,9 @@ class MyApp extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return MaterialApp(
-      title: 'Todo App',
+      title: ' App',
       theme: ThemeData(primarySwatch: Colors.blue),
-      home: MyHomePage(title: 'Todo App'),
+      home: MyHomePage(title: 'Productivity App'),
     );
   }
 }
@@ -35,22 +53,45 @@ class MyHomePage extends StatefulWidget {
 }
 
 class _MyHomePageState extends State<MyHomePage> {
+  final _storage = Storage();
+  final _IntrayPage = IntrayPage();
+
+  String userAuthToken;
+  List tasks;
+
+  void loadLocalData() async {
+    var jsonData = await _storage.read("user");
+    if (jsonData == null) return;
+
+    var user = json.decode(jsonData);
+    userAuthToken = user['idToken'];
+    print("userAuthToken1");
+    print(userAuthToken);
+
+    tasks = json.decode((await _storage.read("tasks")));
+
+    // print("tasks from storage...");
+    // print(tasks);
+  }
+
   @override
   Widget build(BuildContext context) {
+    loadLocalData();
+
     return MaterialApp(
       color: Colors.yellow,
       home: SafeArea(
         child: DefaultTabController(
-          length: 3,
+          length: 2,
           child: new Scaffold(
             body: Stack(
               children: <Widget>[
                 TabBarView(children: [
-                  IntrayPage(),
+                  _IntrayPage,
                   LoginPageWidget(),
-                  new Container(
-                    color: Colors.lightGreen,
-                  )
+                  // new Container(
+                  //   color: Colors.lightGreen,
+                  // )
                 ]),
                 Container(
                   padding: EdgeInsets.only(left: 50),
@@ -97,8 +138,8 @@ class _MyHomePageState extends State<MyHomePage> {
               title: new TabBar(
                 tabs: [
                   Tab(icon: new Icon(Icons.home)),
-                  Tab(icon: new Icon(Icons.rss_feed)),
                   Tab(icon: new Icon(Icons.perm_identity))
+                  // Tab(icon: new Icon(Icons.rss_feed)),
                 ],
                 labelColor: darkGreyColor,
                 unselectedLabelColor: Colors.blue,
@@ -117,8 +158,6 @@ class _MyHomePageState extends State<MyHomePage> {
   void _showAddDialog() {
     TextEditingController taskName = new TextEditingController();
     TextEditingController deadline = new TextEditingController();
-
-    String userAuthToken = LoginPageWidgetState.userAuthToken;
 
     if (userAuthToken == null) {
       showDialog(
@@ -259,11 +298,8 @@ class _MyHomePageState extends State<MyHomePage> {
   }
 
   Future<void> addUserTask(title) async {
-    String userAuthToken = LoginPageWidgetState.userAuthToken;
-    print('userAuthToken...');
-    print(userAuthToken);
-
     Map reqBody = {"title": title};
+    print('add tasks...');
 
     final response = await http.post(
       // 'http://10.0.2.2:5000/api/task',
@@ -280,7 +316,17 @@ class _MyHomePageState extends State<MyHomePage> {
       // then parse the JSON.
       // print(json.decode(response.body)[0]);
       var jsonRes = json.decode(response.body);
-      print(jsonRes);
+
+      tasks.add(jsonRes['data']);
+
+      _storage.addNewItem(
+        "tasks",
+        json.encode(tasks),
+      );
+
+      _IntrayPage.addTaskHandler();
+
+      // print(jsonRes);
     } else {
       print(response.body);
       // If the server did not return a 200 OK response,
