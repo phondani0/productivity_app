@@ -25,6 +25,7 @@ dependencies:
   firebase_auth: ^0.18.0+1
   google_sign_in: ^4.5.3
   http: ^0.12.2
+  flutter_secure_storage: ^3.3.5
   flutter:
     sdk: flutter
 

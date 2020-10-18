@@ -5,6 +5,7 @@ import 'package:firebase_auth/firebase_auth.dart';
 import 'package:firebase_core/firebase_core.dart';
 import 'package:flutter/material.dart';
 import 'package:google_sign_in/google_sign_in.dart';
+import 'package:todoapp/models/classes/storage.dart';
 import 'package:todoapp/models/classes/user.dart';
 import 'package:todoapp/models/global.dart';
 
@@ -17,8 +18,8 @@ class LoginPageWidgetState extends State<LoginPageWidget> {
   GoogleSignIn _googleSignIn = GoogleSignIn();
   FirebaseAuth _auth;
   bool isUserSignedIn = false;
-  static String userAuthToken;
   static LocalUser localUser;
+  var storage = Storage();
 
   @override
   void initState() {
@@ -34,21 +35,27 @@ class LoginPageWidgetState extends State<LoginPageWidget> {
   }
 
   void checkIfUserIsSignedIn() async {
-    var userSignedIn = await _googleSignIn.isSignedIn();
-    var user = _googleSignIn.currentUser;
-    var localUser;
-    print(user);
-    if (user != null) {
-      localUser = LocalUser(
-        id: user.id,
-        displayName: user.displayName,
-        photoUrl: user.photoUrl,
-        email: user.email,
-      );
-    }
+    // var userSignedIn = await _googleSignIn.isSignedIn();
+    // var user = _googleSignIn.currentUser;
+
+    var jsonData = await storage.readAll();
+
+    if (jsonData == null || jsonData['user'] == null) return;
+
+    var user = json.decode(jsonData['user']);
+
+    // print(user);
+
     setState(() {
-      isUserSignedIn = userSignedIn;
-      localUser = localUser;
+      isUserSignedIn = user['isAuth'];
+      localUser = LocalUser(
+        id: user['id'],
+        displayName: user['displayName'],
+        photoUrl: user['photoUrl'],
+        email: user['email'],
+        idToken: user['idToken'],
+        isAuth: true,
+      );
     });
   }
 
@@ -69,14 +76,60 @@ class LoginPageWidgetState extends State<LoginPageWidget> {
     setState(() {
       // isUserSignedIn = userSign;edIn == null ? true : false;
       isUserSignedIn = true;
-      userAuthToken = idToken;
       localUser = LocalUser(
         id: user.uid,
         displayName: user.displayName,
         photoUrl: user.photoURL,
         email: user.email,
+        idToken: idToken,
+        isAuth: true,
       );
     });
+  }
+
+  Future<User> _handleSignIn() async {
+    // hold the instance of the authenticated user
+    User user;
+    // flag to check whether we're signed in already
+    bool isSignedIn = await _googleSignIn.isSignedIn();
+    // setState(() {
+    //   isUserSignedIn = userSignedIn;
+    // });
+    if (isSignedIn) {
+      // if so, return the current user
+      user = _auth.currentUser;
+    } else {
+      final GoogleSignInAccount googleUser = await _googleSignIn.signIn();
+      final GoogleSignInAuthentication googleAuth =
+          await googleUser.authentication;
+      // get the credentials to (access / id token)
+      // to sign in via Firebase Authentication
+      final AuthCredential credential = GoogleAuthProvider.credential(
+        idToken: googleAuth.idToken,
+        accessToken: googleAuth.accessToken,
+      );
+      user = (await _auth.signInWithCredential(credential)).user;
+
+      // add user to storage
+      storage.addNewItem(
+        "user",
+        json.encode({
+          "id": user.uid,
+          "displayName": user.displayName,
+          "photoUrl": user.photoURL,
+          "email": user.email,
+          "idToken": await user.getIdToken(),
+          "isAuth": await _googleSignIn.isSignedIn()
+        }),
+      );
+
+      var userSignedIn = await _googleSignIn.isSignedIn();
+
+      setState(() {
+        isUserSignedIn = userSignedIn;
+      });
+    }
+    return user;
   }
 
   @override
@@ -120,6 +173,7 @@ class LoginPageWidgetState extends State<LoginPageWidget> {
                             setState(() {
                               isUserSignedIn = false;
                               localUser = null;
+                              storage.deleteAll();
                             });
                           },
                         ),
@@ -151,34 +205,6 @@ class LoginPageWidgetState extends State<LoginPageWidget> {
         ),
       ),
     );
-  }
-
-  Future<User> _handleSignIn() async {
-    // hold the instance of the authenticated user
-    User user;
-    // flag to check whether we're signed in already
-    bool isSignedIn = await _googleSignIn.isSignedIn();
-    // setState(() {
-    //   isUserSignedIn = userSignedIn;
-    // });
-    if (isSignedIn) {
-      // if so, return the current user
-      user = _auth.currentUser;
-    } else {
-      final GoogleSignInAccount googleUser = await _googleSignIn.signIn();
-      final GoogleSignInAuthentication googleAuth =
-          await googleUser.authentication;
-      // get the credentials to (access / id token)
-      // to sign in via Firebase Authentication
-      final AuthCredential credential = GoogleAuthProvider.credential(
-          idToken: googleAuth.idToken, accessToken: googleAuth.accessToken);
-      user = (await _auth.signInWithCredential(credential)).user;
-      var userSignedIn = await _googleSignIn.isSignedIn();
-      setState(() {
-        isUserSignedIn = userSignedIn;
-      });
-    }
-    return user;
   }
 }
 
