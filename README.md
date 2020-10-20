@@ -2,6 +2,8 @@
 
 A new Flutter project.
 
+![](https://visitor-badge.laobi.icu/badge?page_id=phondani0.productivity_app) 
+
 ## Getting Started
 
 This project is a starting point for a Flutter application.

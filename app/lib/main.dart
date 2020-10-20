@@ -54,6 +54,7 @@ class MyHomePage extends StatefulWidget {
 
 class _MyHomePageState extends State<MyHomePage> {
   final _storage = Storage();
+  final _IntrayPage = IntrayPage();
 
   String userAuthToken;
   List tasks;
@@ -86,7 +87,7 @@ class _MyHomePageState extends State<MyHomePage> {
             body: Stack(
               children: <Widget>[
                 TabBarView(children: [
-                  IntrayPage(),
+                  _IntrayPage,
                   LoginPageWidget(),
                   // new Container(
                   //   color: Colors.lightGreen,
@@ -323,9 +324,7 @@ class _MyHomePageState extends State<MyHomePage> {
         json.encode(tasks),
       );
 
-      // IntrayPage().addTaskHandler();
-
-      setState(() {});
+      _IntrayPage.addTaskHandler();
 
       // print(jsonRes);
     } else {
