@@ -22,6 +22,7 @@ class TaskModel(db.Model):
         self.user_id = user_id
 
     def serialize(self):
+        print(self)
         return {
             "id": self.id,
             "title": self.title,

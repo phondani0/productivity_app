@@ -2,7 +2,7 @@ from flask import request
 from flask_restful import Resource
 from middleware.auth import check_token
 from model import TaskModel, db
-
+import time
 
 class Task(Resource):
 
@@ -22,12 +22,11 @@ class Task(Resource):
 
     @check_token
     def get(self):
-
+        time.sleep(5)
         result = []
         tasks = TaskModel.query.filter_by(
             user_id=request.user['user_id']).all()
-
         for task in tasks:
-            result.append(Task.serialize(task))
+            result.append(TaskModel.serialize(task))
 
-        return TaskModel.serialize(result)
+        return result
