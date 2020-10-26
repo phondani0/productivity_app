@@ -1,3 +1,4 @@
+import 'dart:async';
 import 'dart:convert';
 import 'dart:io';
 
@@ -10,25 +11,35 @@ import 'package:todoapp/models/widgets/intray_todo.dart';
 import 'package:http/http.dart' as http;
 
 class IntrayPage extends StatefulWidget {
-  addTaskHandler() => createState().addTaskHandler();
+  addTaskHandler(data) => createState().addTaskHandler(data);
 
   @override
   IntrayPageState createState() => IntrayPageState();
 }
 
 class IntrayPageState extends State<IntrayPage> {
-  List<Task> taskList = [];
-  static Future<List<Task>> taskAlbum;
+  static List<Task> taskList = [];
+  // static Stream<List<Task>> taskStream;
   final _storage = Storage();
+  static StreamController<List<Task>> _tasksController;
 
   @override
   void initState() {
     super.initState();
-    taskAlbum = fetchTasks();
+    _tasksController = new StreamController<List<Task>>();
+    loadTasks();
   }
 
-  addTaskHandler() {
+  addTaskHandler(data) async {
     print("add task handler called...");
+    print("data $data");
+    // var list = _tasksController.sink;
+    var task = Task.fromJson(data);
+    print(task);
+    print(taskList.length);
+    taskList.insert(0, task);
+    print(taskList.length);
+    _tasksController.add(taskList);
   }
 
   @override
@@ -52,15 +63,15 @@ class IntrayPageState extends State<IntrayPage> {
   Widget _buildReorderableListSimple(BuildContext context) {
     return Theme(
       data: ThemeData(canvasColor: Colors.transparent),
-      child: FutureBuilder<List<Task>>(
-        future: taskAlbum,
-        builder: (context, snapshot) {
+      child: StreamBuilder<List<Task>>(
+        stream: _tasksController.stream,
+        builder: (context, AsyncSnapshot snapshot) {
           if (snapshot.hasData) {
             print(snapshot.data);
             return ReorderableListView(
               padding: EdgeInsets.only(top: 250.0),
               children: snapshot.data
-                  .map((Task item) => _buildListTile(context, item))
+                  .map<Widget>((Task item) => _buildListTile(context, item))
                   .toList(),
               onReorder: _onReorder,
             );
@@ -89,6 +100,14 @@ class IntrayPageState extends State<IntrayPage> {
       Task item = taskList[oldIndex];
       taskList.remove(item);
       taskList.insert(newIndex, item);
+    });
+  }
+
+  void loadTasks() async {
+    fetchTasks().then((res) async {
+      print(res);
+      _tasksController.add(res);
+      taskList = res;
     });
   }
 

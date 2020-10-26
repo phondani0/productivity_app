@@ -317,14 +317,14 @@ class _MyHomePageState extends State<MyHomePage> {
       // print(json.decode(response.body)[0]);
       var jsonRes = json.decode(response.body);
 
-      tasks.add(jsonRes['data']);
+      tasks.insert(0, jsonRes['data']);
 
       _storage.addNewItem(
         "tasks",
         json.encode(tasks),
       );
 
-      _IntrayPage.addTaskHandler();
+      _IntrayPage.addTaskHandler(jsonRes['data']);
 
       // print(jsonRes);
     } else {
