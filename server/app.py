@@ -10,4 +10,4 @@ api = Api(api_bp)
 api.add_resource(Hello, '/Hello')
 
 
-api.add_resource(Task, '/task')
+api.add_resource(Task, '/task', '/task/<string:id>')

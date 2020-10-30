@@ -32,9 +32,8 @@ class Task(Resource):
         return result
 
     @check_token
-    def delete(self):
-        json_data = request.get_json(force=True)
-        print(json_data)
-        db.session.delete(json_data.id)
+    def delete(self, id):
+        print(id)
+        TaskModel.query.filter_by(id=id).delete()
         db.session.commit()
         return {"status": 'success'}
