@@ -8,8 +8,9 @@ class Task {
 
   factory Task.fromJson(Map<String, dynamic> json) {
     // flutter bug: flutter won't throw error if type mismatch
+    var taskId = json['id'];
     return Task(
-      taskId: "$json['id']",
+      taskId: "$taskId",
       title: json['title'],
       completed: json['completed'],
       userId: json['user_id'],

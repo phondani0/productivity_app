@@ -4,10 +4,11 @@ from middleware.auth import check_token
 from model import TaskModel, db
 import time
 
-class Task(Resource):
 
+class Task(Resource):
     @check_token
     def post(self):
+
         print(request.user)
         json_data = request.get_json(force=True)
         print(json_data)
@@ -22,7 +23,6 @@ class Task(Resource):
 
     @check_token
     def get(self):
-        time.sleep(5)
         result = []
         tasks = TaskModel.query.filter_by(
             user_id=request.user['user_id']).all()
@@ -30,3 +30,11 @@ class Task(Resource):
             result.append(TaskModel.serialize(task))
 
         return result
+
+    @check_token
+    def delete(self):
+        json_data = request.get_json(force=True)
+        print(json_data)
+        db.session.delete(json_data.id)
+        db.session.commit()
+        return {"status": 'success'}

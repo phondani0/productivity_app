@@ -12,6 +12,7 @@ import 'package:http/http.dart' as http;
 
 class IntrayPage extends StatefulWidget {
   addTaskHandler(data) => createState().addTaskHandler(data);
+  deleteTaskHandler(taskId) => createState().deleteTaskHandler(taskId);
 
   @override
   IntrayPageState createState() => IntrayPageState();
@@ -42,6 +43,16 @@ class IntrayPageState extends State<IntrayPage> {
     _tasksController.add(taskList);
   }
 
+  deleteTaskHandler(taskId) async {
+    print("deleteTaskHandler called...");
+    print(taskList.length);
+    var index =
+        taskList.indexWhere((element) => element.taskId == taskId.toString());
+    taskList.removeAt(index);
+    print(taskList.length);
+    _tasksController.add(taskList);
+  }
+
   @override
   Widget build(BuildContext context) {
     return Container(
@@ -56,6 +67,7 @@ class IntrayPageState extends State<IntrayPage> {
       key: Key(item.taskId.toString()),
       title: IntrayTodo(
         title: item.title,
+        keyValue: item.taskId.toString(),
       ),
     );
   }
